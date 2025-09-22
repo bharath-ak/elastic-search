@@ -27,6 +27,9 @@ users = [
   {"id": 15, "name": "Divya Rao", "age": 27, "city": "Kolkata"}
 ]
 
+# Index a document
+# es.index(index="users", id=1, document={"name": "Ajay Kumar", "age": 30, "city": "Chennai"})
+
 # Bulk insert
 actions = [{"_index": "users", "_id": u["id"], "_source": u} for u in users]
 helpers.bulk(es, actions)
