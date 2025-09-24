@@ -9,68 +9,68 @@ es = Elasticsearch(
 )
 
 # Sample dataset
-users = [
-  {"id": 1, "name": "Ajay Kumar", "age": 30, "city": "Chennai"},
-  {"id": 2, "name": "Vijay Sharma", "age": 25, "city": "Mumbai"},
-  {"id": 3, "name": "Priya Reddy", "age": 35, "city": "Chennai"},
-  {"id": 4, "name": "Madhu Nair", "age": 28, "city": "Bengaluru"},
-  {"id": 5, "name": "Ravi Singh", "age": 32, "city": "Delhi"},
-  {"id": 6, "name": "Anita Patel", "age": 27, "city": "Hyderabad"},
-  {"id": 7, "name": "Kiran Das", "age": 29, "city": "Pune"},
-  {"id": 8, "name": "Deepak Choudhury", "age": 40, "city": "Kolkata"},
-  {"id": 9, "name": "Sneha Iyer", "age": 24, "city": "Chennai"},
-  {"id": 10, "name": "Rahul Verma", "age": 33, "city": "Mumbai"},
-  {"id": 11, "name": "Meena Joshi", "age": 31, "city": "Delhi"},
-  {"id": 12, "name": "Suresh Gowda", "age": 26, "city": "Hyderabad"},
-  {"id": 13, "name": "Lakshmi Menon", "age": 29, "city": "Bengaluru"},
-  {"id": 14, "name": "Arjun Kapoor", "age": 34, "city": "Pune"},
-  {"id": 15, "name": "Divya Rao", "age": 27, "city": "Kolkata"}
+products = [
+  {"id": 1, "name": "Samsung Galaxy S24 Ultra", "category": "Smartphone", "price": 1299, "stock": 50},
+  {"id": 2, "name": "Samsung Galaxy S24+", "category": "Smartphone", "price": 1099, "stock": 70},
+  {"id": 3, "name": "Samsung Galaxy S24", "category": "Smartphone", "price": 899, "stock": 100},
+  {"id": 4, "name": "Samsung Galaxy Z Fold5", "category": "Smartphone", "price": 1799, "stock": 30},
+  {"id": 5, "name": "Samsung Galaxy Z Flip5", "category": "Smartphone", "price": 999, "stock": 40},
+  {"id": 6, "name": "Samsung Galaxy Tab S9 Ultra", "category": "Tablet", "price": 1199, "stock": 25},
+  {"id": 7, "name": "Samsung Galaxy Tab S9+", "category": "Tablet", "price": 999, "stock": 35},
+  {"id": 8, "name": "Samsung Galaxy Tab S9", "category": "Tablet", "price": 799, "stock": 50},
+  {"id": 9, "name": "Samsung Galaxy Book3 Ultra", "category": "Laptop", "price": 2399, "stock": 15},
+  {"id": 10, "name": "Samsung Galaxy Book3 Pro", "category": "Laptop", "price": 1799, "stock": 20},
+  {"id": 11, "name": "Samsung QN90C Neo QLED 4K TV", "category": "TV", "price": 1999, "stock": 10},
+  {"id": 12, "name": "Samsung QN85C Neo QLED 4K TV", "category": "TV", "price": 1499, "stock": 12},
+  {"id": 13, "name": "Samsung The Frame 55\" 4K TV", "category": "TV", "price": 1299, "stock": 18},
+  {"id": 14, "name": "Samsung Galaxy Buds2 Pro", "category": "Accessories", "price": 229, "stock": 80},
+  {"id": 15, "name": "Samsung Galaxy Watch6 Classic", "category": "Accessories", "price": 399, "stock": 60}
 ]
 
 # Index a document
-# es.index(index="users", id=1, document={"name": "Ajay Kumar", "age": 30, "city": "Chennai"})
+# es.index(index="users", id=1, document={"name": "Samsung Galaxy S24 Ultra", "category": "Smartphone", "price": 1299, "stock": 50})
 
-# Bulk insert
-actions = [{"_index": "users", "_id": u["id"], "_source": u} for u in users]
+# Bulk insert for products
+actions = [{"_index": "products", "_id": p["id"], "_source": p} for p in products]
 helpers.bulk(es, actions)
 
 # Get a document
-print(json.dumps(es.get(index="users", id=1), indent=2))
+print(json.dumps(es.get(index="products", id=1), indent=2))
 
-# Update a document (set age = 31)
-es.update(index="users", id=1, body={"doc": {"age": 31}})
-print(json.dumps(es.get(index="users", id=1), indent=2))
+# Update a document (set stock = 45 for id=1)
+es.update(index="products", id=1, body={"doc": {"stock": 45}})
+print(json.dumps(es.get(index="products", id=1), indent=2))
 
 # Delete a document
-es.delete(index="users", id=1)
+es.delete(index="products", id=1)
 
-# Match query (search for 'Ajay' in name)
-print(json.dumps(es.search(index="users", query={"match": {"name": "Ajay"}}), indent=2))
+# Match query (search for 'Galaxy' in product name)
+print(json.dumps(es.search(index="products", query={"match": {"name": "Galaxy"}}), indent=2))
 
-# Term query (exact filter by city = Chennai)
-print(json.dumps(es.search(index="users", query={"term": {"city.keyword": "Chennai"}}), indent=2))
+# Term query (exact filter by category = Smartphone)
+print(json.dumps(es.search(index="products", query={"term": {"category.keyword": "Smartphone"}}), indent=2))
 
-# Range query (age between 25–30)
-print(json.dumps(es.search(index="users", query={"range": {"age": {"gte": 25, "lte": 30}}}), indent=2))
+# Range query (price between 500–1500)
+print(json.dumps(es.search(index="products", query={"range": {"price": {"gte": 500, "lte": 1500}}}), indent=2))
 
-# Bool query (city = Bengaluru AND age >= 25)
+# Bool query (category = TV AND price >= 1500)
 print(json.dumps(es.search(
-    index="users",
+    index="products",
     query={"bool": {"must": [
-        {"term": {"city.keyword": "Bengaluru"}},
-        {"range": {"age": {"gte": 25}}}
+        {"term": {"category.keyword": "TV"}},
+        {"range": {"price": {"gte": 1500}}}
     ]}}
 ), indent=2))
 
-# Aggregation: average age of all users
-print(json.dumps(es.search(index="users", size=0, aggs={"avg_age": {"avg": {"field": "age"}}}), indent=2))
+# Aggregation: average price of all products
+print(json.dumps(es.search(index="products", size=0, aggs={"avg_price": {"avg": {"field": "price"}}}), indent=2))
 
-# Aggregation: group by city
-print(json.dumps(es.search(index="users", size=0, aggs={"users_per_city": {"terms": {"field": "city.keyword"}}}), indent=2))
+# Aggregation: group by category
+print(json.dumps(es.search(index="products", size=0, aggs={"products_per_category": {"terms": {"field": "category.keyword"}}}), indent=2))
 
-# Aggregation: average age per city
+# Aggregation: average price per category
 print(json.dumps(es.search(
-    index="users",
+    index="products",
     size=0,
-    aggs={"cities": {"terms": {"field": "city.keyword"}, "aggs": {"avg_age": {"avg": {"field": "age"}}}}}
+    aggs={"categories": {"terms": {"field": "category.keyword"}, "aggs": {"avg_price": {"avg": {"field": "price"}}}}}
 ), indent=2))
